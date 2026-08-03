@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Inter:wght@400;500&display=swap');
+
+:root {
+  --ink: #1A1916;
+  --ink-2: #4A4844;
+  --ink-3: #8A8880;
+  --border: #E4E2DA;
+  --border-2: #CECCC4;
+  --surface: #FAFAF7;
+  --surface-2: #F2F1EC;
+  --surface-3: #E8E6DE;
+  --white: #FFFFFF;
+
+  --brand: #2B2275;
+  --brand-light: #EEEDF8;
+  --brand-mid: #4B3FBF;
+  --brand-dark: #1A1547;
+
+  --green: #1A6B50;
+  --green-light: #E4F3EE;
+  --green-dark: #0E4534;
+
+  --amber: #B86E00;
+  --amber-light: #FEF3DC;
+  --amber-dark: #7A4800;
+
+  --red: #991B1B;
+  --red-light: #FEE2E2;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.04);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+input, select, textarea, button {
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
