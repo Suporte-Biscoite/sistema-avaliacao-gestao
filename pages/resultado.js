@@ -3,6 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { COMPETENCIAS_COLABORADOR, NOTAS_DESCRICAO, gerarDescricao } from '../lib/competencias';
 import styles from '../styles/Resultado.module.css';
 
+function loadChartJS(cb) {
+  if (window.Chart) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
 export default function Resultado() {
   const router = useRouter();
   const radarRef = useRef(null);
@@ -20,81 +28,75 @@ export default function Resultado() {
 
   useEffect(() => {
     if (!dados || !descricao) return;
-    renderCharts();
+    loadChartJS(() => renderCharts());
   }, [dados, descricao]);
 
   function renderCharts() {
-    if (typeof window === 'undefined' || !window.Chart) return;
     const notas = COMPETENCIAS_COLABORADOR.map(c => dados.notas[c.id] || 0);
     const labels = COMPETENCIAS_COLABORADOR.map(c => c.nome);
-    const corPrincipal = '#3C3489';
-    const corFundo = 'rgba(60,52,137,0.12)';
 
     if (radarRef.current) {
       if (radarRef.current._chart) radarRef.current._chart.destroy();
-      const ctx = radarRef.current.getContext('2d');
-      radarRef.current._chart = new window.Chart(ctx, {
+      radarRef.current._chart = new window.Chart(radarRef.current, {
         type: 'radar',
         data: {
           labels,
           datasets: [{
-            label: 'Sua autoavaliação',
+            label: 'Autoavaliação',
             data: notas,
-            backgroundColor: corFundo,
-            borderColor: corPrincipal,
+            backgroundColor: 'rgba(60,52,137,0.12)',
+            borderColor: '#3C3489',
             borderWidth: 2,
-            pointBackgroundColor: corPrincipal,
+            pointBackgroundColor: '#3C3489',
             pointRadius: 4,
-            pointHoverRadius: 6,
           }],
         },
         options: {
-          responsive: true, maintainAspectRatio: false,
+          responsive: true,
+          maintainAspectRatio: false,
           scales: {
             r: {
               min: 0, max: 5,
               ticks: { stepSize: 1, display: false },
-              pointLabels: { font: { size: 12, family: 'Inter' }, color: '#4A4844' },
+              pointLabels: { font: { size: 11, family: 'Inter' }, color: '#4A4844' },
               grid: { color: '#E4E2DA' },
               angleLines: { color: '#E4E2DA' },
             },
           },
-          plugins: { legend: { display: false }, tooltip: {
-            callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO[ctx.raw] || ''}` }
-          }},
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO[ctx.raw] || ''}` } },
+          },
         },
       });
     }
 
     if (barRef.current) {
       if (barRef.current._chart) barRef.current._chart.destroy();
-      const cores = notas.map(n =>
-        n >= 4 ? '#1A6B50' : n >= 3 ? '#B86E00' : n > 0 ? '#3C3489' : '#E4E2DA'
-      );
-      const ctx = barRef.current.getContext('2d');
-      barRef.current._chart = new window.Chart(ctx, {
+      const cores = notas.map(n => n >= 4 ? '#1A6B50' : n >= 3 ? '#B86E00' : n > 0 ? '#3C3489' : '#E4E2DA');
+      barRef.current._chart = new window.Chart(barRef.current, {
         type: 'bar',
         data: {
           labels,
           datasets: [{
-            label: 'Nota',
             data: notas,
             backgroundColor: cores,
             borderRadius: 6,
             borderSkipped: false,
-            barThickness: 32,
+            barThickness: 28,
           }],
         },
         options: {
           indexAxis: 'y',
-          responsive: true, maintainAspectRatio: false,
+          responsive: true,
+          maintainAspectRatio: false,
           scales: {
             x: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#E4E2DA' } },
-            y: { grid: { display: false }, ticks: { font: { size: 13 } } },
+            y: { grid: { display: false }, ticks: { font: { size: 12 } } },
           },
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO[ctx.raw] || ''}` }},
+            tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO[ctx.raw] || ''}` } },
           },
         },
       });
@@ -104,11 +106,10 @@ export default function Resultado() {
   if (!dados || !descricao) return <div className={styles.loading}>Carregando...</div>;
 
   const corNivel = descricao.cor === 'green' ? styles.verde : descricao.cor === 'amber' ? styles.amber : styles.vermelho;
+  const alturaBar = Math.max(240, COMPETENCIAS_COLABORADOR.length * 44 + 40);
 
   return (
     <div className={styles.page}>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" onLoad={() => renderCharts()} />
-
       <div className={styles.container}>
         <div className={styles.header}>
           <button className={styles.back} onClick={() => router.push('/')}>← Voltar</button>
@@ -120,7 +121,7 @@ export default function Resultado() {
             <div className={styles.avatar}>{dados.nome?.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()}</div>
             <div>
               <div className={styles.heroNome}>{dados.nome}</div>
-              <div className={styles.heroMeta}>{dados.cargo}{dados.area ? ` · ${dados.area}` : ''}{dados.periodo ? ` · ${dados.periodo}` : ''}</div>
+              <div className={styles.heroMeta}>{[dados.cargo, dados.area, dados.periodo].filter(Boolean).join(' · ')}</div>
             </div>
           </div>
           <div className={styles.heroMedia}>
@@ -132,14 +133,14 @@ export default function Resultado() {
         <div className={styles.chartsRow}>
           <div className={styles.chartCard}>
             <div className={styles.chartTitle}>Visão radar — competências</div>
-            <div className={styles.chartWrap} style={{height: 280}}>
-              <canvas ref={radarRef} role="img" aria-label="Radar das competências avaliadas" />
+            <div className={styles.chartWrap} style={{ height: 260 }}>
+              <canvas ref={radarRef} role="img" aria-label="Radar das competências" />
             </div>
           </div>
           <div className={styles.chartCard}>
             <div className={styles.chartTitle}>Desempenho por competência</div>
-            <div className={styles.chartWrap} style={{height: 280}}>
-              <canvas ref={barRef} role="img" aria-label="Gráfico de barras por competência" />
+            <div className={styles.chartWrap} style={{ height: alturaBar }}>
+              <canvas ref={barRef} role="img" aria-label="Barras por competência" />
             </div>
           </div>
         </div>

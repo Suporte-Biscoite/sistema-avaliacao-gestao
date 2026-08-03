@@ -4,6 +4,14 @@ import { COMPETENCIAS_GESTOR, NOTAS_DESCRICAO_GESTOR, gerarDescricao } from '../
 import styles from '../styles/Resultado.module.css';
 import gStyles from '../styles/ResultadoGestor.module.css';
 
+function loadChartJS(cb) {
+  if (window.Chart) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
 export default function ResultadoGestor() {
   const router = useRouter();
   const radarRef = useRef(null);
@@ -21,28 +29,45 @@ export default function ResultadoGestor() {
 
   useEffect(() => {
     if (!dados || !descricao) return;
-    const interval = setInterval(() => {
-      if (window.Chart) { renderCharts(); clearInterval(interval); }
-    }, 100);
-    return () => clearInterval(interval);
+    loadChartJS(() => renderCharts());
   }, [dados, descricao]);
 
   function renderCharts() {
-    if (!window.Chart) return;
     const notas = COMPETENCIAS_GESTOR.map(c => dados.notas[c.id] || 0);
     const labels = COMPETENCIAS_GESTOR.map(c => c.nome);
-    const cor = '#0F6E56';
-    const fundo = 'rgba(15,110,86,0.12)';
 
     if (radarRef.current) {
       if (radarRef.current._chart) radarRef.current._chart.destroy();
-      radarRef.current._chart = new window.Chart(radarRef.current.getContext('2d'), {
+      radarRef.current._chart = new window.Chart(radarRef.current, {
         type: 'radar',
-        data: { labels, datasets: [{ label: 'Avaliação do gestor', data: notas, backgroundColor: fundo, borderColor: cor, borderWidth: 2, pointBackgroundColor: cor, pointRadius: 4 }] },
+        data: {
+          labels,
+          datasets: [{
+            label: 'Avaliação da liderança',
+            data: notas,
+            backgroundColor: 'rgba(15,110,86,0.12)',
+            borderColor: '#0F6E56',
+            borderWidth: 2,
+            pointBackgroundColor: '#0F6E56',
+            pointRadius: 4,
+          }],
+        },
         options: {
-          responsive: true, maintainAspectRatio: false,
-          scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, display: false }, pointLabels: { font: { size: 11, family: 'Inter' }, color: '#4A4844' }, grid: { color: '#E4E2DA' }, angleLines: { color: '#E4E2DA' } } },
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO_GESTOR[ctx.raw] || ''}` } } },
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0, max: 5,
+              ticks: { stepSize: 1, display: false },
+              pointLabels: { font: { size: 11, family: 'Inter' }, color: '#4A4844' },
+              grid: { color: '#E4E2DA' },
+              angleLines: { color: '#E4E2DA' },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO_GESTOR[ctx.raw] || ''}` } },
+          },
         },
       });
     }
@@ -50,13 +75,30 @@ export default function ResultadoGestor() {
     if (barRef.current) {
       if (barRef.current._chart) barRef.current._chart.destroy();
       const cores = notas.map(n => n >= 4 ? '#1A6B50' : n >= 3 ? '#B86E00' : n > 0 ? '#0F6E56' : '#E4E2DA');
-      barRef.current._chart = new window.Chart(barRef.current.getContext('2d'), {
+      barRef.current._chart = new window.Chart(barRef.current, {
         type: 'bar',
-        data: { labels, datasets: [{ data: notas, backgroundColor: cores, borderRadius: 6, borderSkipped: false, barThickness: 28 }] },
+        data: {
+          labels,
+          datasets: [{
+            data: notas,
+            backgroundColor: cores,
+            borderRadius: 6,
+            borderSkipped: false,
+            barThickness: 28,
+          }],
+        },
         options: {
-          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          scales: { x: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#E4E2DA' } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } },
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO_GESTOR[ctx.raw] || ''}` } } },
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#E4E2DA' } },
+            y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.raw}/5 — ${NOTAS_DESCRICAO_GESTOR[ctx.raw] || ''}` } },
+          },
         },
       });
     }
@@ -64,15 +106,16 @@ export default function ResultadoGestor() {
 
   if (!dados || !descricao) return <div className={styles.loading}>Carregando...</div>;
   const corNivel = descricao.cor === 'green' ? styles.verde : descricao.cor === 'amber' ? styles.amber : styles.vermelho;
+  const alturaBar = Math.max(240, COMPETENCIAS_GESTOR.length * 44 + 40);
 
   return (
     <div className={styles.page}>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" />
       <div className={styles.container}>
         <div className={styles.header}>
           <button className={styles.back} onClick={() => router.push('/')}>← Voltar</button>
           <span className={gStyles.tagGestor}>Avaliação do gestor</span>
         </div>
+
         <div className={`${styles.heroCard} ${gStyles.heroGestor}`}>
           <div className={styles.heroLeft}>
             <div className={gStyles.avatarGestor}>{dados.nomeGestor?.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase() || 'G'}</div>
@@ -86,24 +129,27 @@ export default function ResultadoGestor() {
             <div className={styles.mediaNivel}>{descricao.nivel}</div>
           </div>
         </div>
+
         <div className={styles.chartsRow}>
           <div className={styles.chartCard}>
             <div className={styles.chartTitle}>Visão radar — liderança</div>
-            <div className={styles.chartWrap} style={{height:300}}>
+            <div className={styles.chartWrap} style={{ height: 280 }}>
               <canvas ref={radarRef} role="img" aria-label="Radar das competências de liderança" />
             </div>
           </div>
           <div className={styles.chartCard}>
             <div className={styles.chartTitle}>Desempenho por dimensão</div>
-            <div className={styles.chartWrap} style={{height:300}}>
+            <div className={styles.chartWrap} style={{ height: alturaBar }}>
               <canvas ref={barRef} role="img" aria-label="Barras por competência de gestão" />
             </div>
           </div>
         </div>
+
         <div className={styles.descCard}>
           <div className={styles.descTitle}>Parecer geral da liderança</div>
           <p className={styles.descTexto}>{descricao.parecer}</p>
         </div>
+
         <div className={styles.ptRow}>
           {descricao.fortes.length > 0 && (
             <div className={`${styles.ptCard} ${styles.ptFortes}`}>
@@ -128,6 +174,7 @@ export default function ResultadoGestor() {
             </div>
           )}
         </div>
+
         <p className={styles.rodape}>Biscoitech · Avaliação 360° — feedback da equipe para a liderança</p>
       </div>
     </div>
