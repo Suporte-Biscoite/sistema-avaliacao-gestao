@@ -1,11 +1,14 @@
 import { inserirAvaliacao, listarAvaliacoes } from '../../../lib/db';
 
+// PIN do gestor — variável sem NEXT_PUBLIC_ para ficar só no servidor
+const PIN_GESTOR = process.env.PIN_GESTOR || process.env.NEXT_PUBLIC_PIN_GESTOR || '9999';
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const dados = req.body;
 
-      if (!dados.nome || dados.nome.trim() === '') {
+      if (!dados || !dados.nome || dados.nome.trim() === '') {
         return res.status(400).json({ erro: 'Nome é obrigatório.' });
       }
 
@@ -35,15 +38,17 @@ export default async function handler(req, res) {
 
       return res.status(201).json({ sucesso: true, id: resultado.id });
     } catch (err) {
-      console.error('Erro ao salvar avaliação:', err);
-      return res.status(500).json({ erro: 'Erro ao salvar avaliação. Tente novamente.' });
+      console.error('[POST /api/avaliacoes] Erro:', err.message);
+      return res.status(500).json({
+        erro: 'Erro ao salvar avaliação.',
+        detalhe: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      });
     }
   }
 
   if (req.method === 'GET') {
-    // Verifica PIN do gestor via header
     const pin = req.headers['x-pin'];
-    if (pin !== process.env.NEXT_PUBLIC_PIN_GESTOR) {
+    if (!pin || pin !== PIN_GESTOR) {
       return res.status(401).json({ erro: 'Acesso não autorizado.' });
     }
 
@@ -51,8 +56,11 @@ export default async function handler(req, res) {
       const avaliacoes = await listarAvaliacoes();
       return res.status(200).json({ avaliacoes });
     } catch (err) {
-      console.error('Erro ao listar avaliações:', err);
-      return res.status(500).json({ erro: 'Erro ao buscar avaliações.' });
+      console.error('[GET /api/avaliacoes] Erro:', err.message);
+      return res.status(500).json({
+        erro: 'Erro ao buscar avaliações.',
+        detalhe: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      });
     }
   }
 
