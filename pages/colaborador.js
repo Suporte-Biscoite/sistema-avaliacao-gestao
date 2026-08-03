@@ -3,15 +3,9 @@ import { useRouter } from 'next/router';
 import { IconArrowLeft, IconArrowRight, IconCheck, IconUser, IconLock } from '../components/Icons';
 import styles from '../styles/Colaborador.module.css';
 
-const COMPETENCIAS = [
-  { id: 'atitude', nome: 'Atitude', desc: 'Proatividade, iniciativa e postura diante dos desafios' },
-  { id: 'comprometimento', nome: 'Comprometimento', desc: 'Responsabilidade com entregas, metas e com a equipe' },
-  { id: 'pontualidade', nome: 'Pontualidade', desc: 'Respeito a horários, prazos e compromissos assumidos' },
-  { id: 'conhecimento', nome: 'Conhecimento', desc: 'Domínio técnico e busca contínua por aprendizado' },
-  { id: 'comportamento', nome: 'Comportamento', desc: 'Relacionamento interpessoal, ética e postura profissional' },
-];
+import { COMPETENCIAS_COLABORADOR as COMPETENCIAS } from '../lib/competencias';
 
-const NOTAS_LBL = ['', 'Preciso melhorar muito', 'Abaixo do esperado', 'Dentro do esperado', 'Acima do esperado', 'Referência na equipe'];
+import { NOTAS_DESCRICAO as NOTAS_LBL } from '../lib/competencias';
 
 const AREAS = [
   'IA', 'Performance', 'Processos', 'E-commerce', 'Venda Digital',
@@ -98,9 +92,16 @@ export default function Colaborador() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.erro || 'Erro desconhecido');
-      setNomeEnviado(form.nome.split(' ')[0]);
-      setEtapa('sucesso');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      sessionStorage.setItem('resultado_colaborador', JSON.stringify({
+        nome: form.nome, cargo: form.cargo, area: form.area, periodo: form.periodo,
+        notas: {
+          atitude: form.nota_atitude, comprometimento: form.nota_comprometimento,
+          pontualidade: form.nota_pontualidade, conhecimento: form.nota_conhecimento,
+          comportamento: form.nota_comportamento, colaboracao: form.nota_colaboracao,
+          adaptabilidade: form.nota_adaptabilidade,
+        },
+      }));
+      router.push('/resultado');
     } catch (e) {
       setErroEnvio(e.message);
     } finally {

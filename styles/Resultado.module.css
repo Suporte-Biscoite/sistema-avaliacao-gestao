@@ -1,0 +1,49 @@
+.page { min-height:100vh; background:var(--surface); padding:2rem 1rem; }
+.container { max-width:780px; margin:0 auto; }
+.loading { display:flex; align-items:center; justify-content:center; min-height:60vh; color:var(--ink-3); }
+
+.header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.back { background:none; border:none; color:var(--ink-3); font-size:13px; cursor:pointer; font-family:var(--font-body); display:flex; align-items:center; gap:4px; padding:0; }
+.back:hover { color:var(--ink); }
+.tag { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:4px 12px; border-radius:9999px; background:var(--brand-light); color:var(--brand-dark); }
+
+.heroCard { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-xl); padding:1.25rem 1.5rem; display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; gap:1rem; }
+.heroLeft { display:flex; align-items:center; gap:14px; }
+.avatar { width:48px; height:48px; border-radius:50%; background:var(--brand-light); color:var(--brand-dark); font-family:var(--font-display); font-size:16px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.heroNome { font-size:17px; font-weight:600; color:var(--ink); margin-bottom:3px; }
+.heroMeta { font-size:13px; color:var(--ink-3); }
+.heroMedia { text-align:right; }
+.mediaNota { font-family:var(--font-display); font-size:32px; font-weight:600; line-height:1; margin-bottom:4px; }
+.mediaNivel { font-size:12px; color:var(--ink-3); }
+
+.verde { color:var(--green); }
+.amber { color:var(--amber); }
+.vermelho { color:var(--red); }
+
+.chartsRow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+.chartCard { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; }
+.chartTitle { font-size:13px; font-weight:600; color:var(--ink-2); margin-bottom:1rem; }
+.chartWrap { position:relative; width:100%; }
+
+.descCard { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1rem; }
+.descTitle { font-size:13px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:.06em; margin-bottom:.6rem; }
+.descTexto { font-size:14px; color:var(--ink); line-height:1.7; }
+
+.ptRow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; }
+.ptCard { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; }
+.ptFortes { border-top:3px solid var(--green); }
+.ptMelhorar { border-top:3px solid var(--amber); }
+.ptLabel { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); margin-bottom:.75rem; }
+.ptItem { display:flex; align-items:center; gap:10px; margin-bottom:.6rem; }
+.ptNota { width:28px; height:28px; border-radius:50%; background:var(--green-light); color:var(--green-dark); font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ptNotaMelhorar { background:var(--amber-light); color:var(--amber-dark); }
+.ptNome { font-size:13px; font-weight:600; color:var(--ink); }
+.ptDesc { font-size:12px; color:var(--ink-3); }
+
+.rodape { font-size:12px; color:var(--ink-3); text-align:center; padding-bottom:1rem; }
+
+@media(max-width:600px) {
+  .chartsRow, .ptRow { grid-template-columns:1fr; }
+  .heroCard { flex-direction:column; align-items:flex-start; }
+  .heroMedia { text-align:left; }
+}

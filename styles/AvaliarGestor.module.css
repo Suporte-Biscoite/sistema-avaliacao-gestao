@@ -1,0 +1,5 @@
+.tagGestor { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:4px 12px; border-radius:9999px; background:#E1F5EE; color:#085041; }
+.pinIconGestor { width:52px; height:52px; background:#E1F5EE; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem; color:#0F6E56; }
+.progressGreen { background:var(--green) !important; }
+.notaBadgeGestor { width:28px; height:28px; border-radius:50%; background:#E1F5EE; color:#085041; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.starSelGreen { background:#E1F5EE !important; border-color:var(--green) !important; color:#085041 !important; }
