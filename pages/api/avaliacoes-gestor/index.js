@@ -1,12 +1,24 @@
 import { Pool } from 'pg';
 
-const connectionString =
+let baseUrl =
   process.env.POSTGRES_URL_NON_POOLING ||
   process.env.POSTGRES_URL ||
   process.env.DATABASE_URL;
 
+function buildConnectionString(url) {
+  if (!url) return url;
+  const u = new URL(url);
+  u.searchParams.delete('sslmode');
+  u.searchParams.delete('uselibpqcompat');
+  u.searchParams.set('sslmode', 'require');
+  u.searchParams.set('uselibpqcompat', 'true');
+  return u.toString();
+}
+
+const connectionString = buildConnectionString(baseUrl);
+
 function getClient() {
-  return new Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 1, connectionTimeoutMillis: 8000 });
+  return new Pool({ connectionString, max: 1, connectionTimeoutMillis: 8000, idleTimeoutMillis: 10000 });
 }
 
 async function query(text, params) {
@@ -52,29 +64,34 @@ export default async function handler(req, res) {
           pontos_fortes, sugestoes, mensagem_livre
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING id`,
         [
-          (d.nomeColaborador||d.nome_colaborador||'').trim(),
-          d.cargo||'', d.area||'', d.periodo||'', d.nomeGestor||'',
-          parseInt(d.nota_direcao)||null, parseInt(d.nota_desenvolvimento)||null,
-          parseInt(d.nota_feedback)||null, parseInt(d.nota_acessibilidade)||null,
-          parseInt(d.nota_gestao_recursos)||null, parseInt(d.nota_inspiracao)||null,
-          d.obs_direcao||'', d.obs_desenvolvimento||'', d.obs_feedback||'',
-          d.obs_acessibilidade||'', d.obs_gestao_recursos||'', d.obs_inspiracao||'',
-          d.pontos_fortes||'', d.sugestoes||'', d.mensagem_livre||'',
+          (d.nomeColaborador || d.nome_colaborador || '').trim(),
+          d.cargo || '', d.area || '', d.periodo || '', d.nomeGestor || '',
+          parseInt(d.nota_direcao) || null, parseInt(d.nota_desenvolvimento) || null,
+          parseInt(d.nota_feedback) || null, parseInt(d.nota_acessibilidade) || null,
+          parseInt(d.nota_gestao_recursos) || null, parseInt(d.nota_inspiracao) || null,
+          d.obs_direcao || '', d.obs_desenvolvimento || '', d.obs_feedback || '',
+          d.obs_acessibilidade || '', d.obs_gestao_recursos || '', d.obs_inspiracao || '',
+          d.pontos_fortes || '', d.sugestoes || '', d.mensagem_livre || '',
         ]
       );
       return res.status(201).json({ sucesso: true, id: rows[0].id });
-    } catch(err) {
+    } catch (err) {
       console.error('[POST avaliacoes-gestor]', err.message);
-      return res.status(500).json({ erro: 'Erro ao salvar.', detalhe: process.env.NODE_ENV==='development'?err.message:undefined });
+      return res.status(500).json({ erro: 'Erro ao salvar.', detalhe: process.env.NODE_ENV === 'development' ? err.message : undefined });
     }
   }
+
   if (req.method === 'GET') {
     if (req.headers['x-pin'] !== PIN_GESTOR) return res.status(401).json({ erro: 'Não autorizado.' });
     try {
       await ensureTable();
       const { rows } = await query(`SELECT * FROM avaliacoes_gestor ORDER BY criado_em DESC`);
       return res.status(200).json({ avaliacoes: rows });
-    } catch(err) { return res.status(500).json({ erro: 'Erro ao buscar.' }); }
+    } catch (err) {
+      console.error('[GET avaliacoes-gestor]', err.message);
+      return res.status(500).json({ erro: 'Erro ao buscar.' });
+    }
   }
+
   return res.status(405).json({ erro: 'Método não permitido.' });
 }
